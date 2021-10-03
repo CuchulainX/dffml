@@ -1,7 +1,5 @@
 import csv
-import json
 import pathlib
-import contextlib
 
 from dffml.cli.cli import CLI
 from dffml.util.asynctestcase import AsyncTestCase
@@ -53,24 +51,23 @@ class TestLogisticRegression(AsyncTestCase):
             "-source-filename",
             data_filename,
         )
-        with contextlib.redirect_stdout(self.stdout):
-            # Make prediction
-            await CLI._main(
-                "predict",
-                "all",
-                *model_args,
-                "-sources",
-                "predict_data=csv",
-                "-source-filename",
-                data_filename,
-            )
-            results = json.loads(self.stdout.getvalue())
-            self.assertTrue(isinstance(results, list))
-            self.assertEqual(len(results), 10)
-            for i, result in enumerate(results):
-                self.assertIn("prediction", result)
-                result = result["prediction"]
-                self.assertIn("ans", result)
-                result = result["ans"]
-                self.assertIn("value", result)
-                result = result["value"]
+        # Make prediction
+        results = await CLI._main(
+            "predict",
+            "all",
+            *model_args,
+            "-sources",
+            "predict_data=csv",
+            "-source-filename",
+            data_filename,
+        )
+        self.assertTrue(isinstance(results, list))
+        self.assertEqual(len(results), 10)
+        for i, result in enumerate(results):
+            result = result.export()
+            self.assertIn("prediction", result)
+            result = result["prediction"]
+            self.assertIn("ans", result)
+            result = result["ans"]
+            self.assertIn("value", result)
+            result = result["value"]

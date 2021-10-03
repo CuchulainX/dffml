@@ -3,9 +3,7 @@ This file contains integration tests. We use the CLI to exercise functionality o
 various DFFML classes and constructs.
 """
 import csv
-import json
 import pathlib
-import contextlib
 
 import numpy as np
 from sklearn.datasets import make_classification, make_regression
@@ -85,41 +83,39 @@ class TestDNNC(AsyncTestCase):
             "-source-filename",
             data_filename,
         )
-        with contextlib.redirect_stdout(self.stdout):
-            # Make prediction
-            await CLI._main(
-                "predict",
-                "all",
-                "-model",
-                "tfdnnc",
-                *features,
-                "-model-predict",
-                "true_class:int:1",
-                "-model-location",
-                model_dir,
-                "-model-classifications",
-                "0",
-                "1",
-                "2",
-                "3",
-                "-model-clstype",
-                "int",
-                "-sources",
-                "predict_data=csv",
-                "-source-filename",
-                data_filename,
-            )
-            results = json.loads(self.stdout.getvalue())
-            self.assertTrue(isinstance(results, list))
-            self.assertTrue(results)
-            results = results[0]
-            self.assertIn("prediction", results)
-            results = results["prediction"]
-            self.assertIn("true_class", results)
-            results = results["true_class"]
-            self.assertIn("value", results)
-            results = results["value"]
-            self.assertIn(results, [0, 1, 2, 3])
+        # Make prediction
+        results = await CLI._main(
+            "predict",
+            "all",
+            "-model",
+            "tfdnnc",
+            *features,
+            "-model-predict",
+            "true_class:int:1",
+            "-model-location",
+            model_dir,
+            "-model-classifications",
+            "0",
+            "1",
+            "2",
+            "3",
+            "-model-clstype",
+            "int",
+            "-sources",
+            "predict_data=csv",
+            "-source-filename",
+            data_filename,
+        )
+        self.assertTrue(isinstance(results, list))
+        self.assertTrue(results)
+        results = results[0].export()
+        self.assertIn("prediction", results)
+        results = results["prediction"]
+        self.assertIn("true_class", results)
+        results = results["true_class"]
+        self.assertIn("value", results)
+        results = results["value"]
+        self.assertIn(results, [0, 1, 2, 3])
 
 
 class TestDNNR(AsyncTestCase):
@@ -178,31 +174,29 @@ class TestDNNR(AsyncTestCase):
             "-source-filename",
             data_filename,
         )
-        with contextlib.redirect_stdout(self.stdout):
-            # Make prediction
-            await CLI._main(
-                "predict",
-                "all",
-                "-model",
-                "tfdnnr",
-                *features,
-                "-model-predict",
-                "true_target:float:1",
-                "-model-location",
-                model_dir,
-                "-sources",
-                "predict_data=csv",
-                "-source-filename",
-                data_filename,
-            )
-            results = json.loads(self.stdout.getvalue())
-            self.assertTrue(isinstance(results, list))
-            self.assertTrue(results)
-            results = results[0]
-            self.assertIn("prediction", results)
-            results = results["prediction"]
-            self.assertIn("true_target", results)
-            results = results["true_target"]
-            self.assertIn("value", results)
-            results = results["value"]
-            self.assertTrue(results is not None)
+        # Make prediction
+        results = await CLI._main(
+            "predict",
+            "all",
+            "-model",
+            "tfdnnr",
+            *features,
+            "-model-predict",
+            "true_target:float:1",
+            "-model-location",
+            model_dir,
+            "-sources",
+            "predict_data=csv",
+            "-source-filename",
+            data_filename,
+        )
+        self.assertTrue(isinstance(results, list))
+        self.assertTrue(results)
+        results = results[0].export()
+        self.assertIn("prediction", results)
+        results = results["prediction"]
+        self.assertIn("true_target", results)
+        results = results["true_target"]
+        self.assertIn("value", results)
+        results = results["value"]
+        self.assertTrue(results is not None)

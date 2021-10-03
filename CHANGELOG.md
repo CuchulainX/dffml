@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - high_level `accuracy()` now takes predict features as parameter.
 - Spacy `model_name_or_path` was changed to `model_name`. Functionality is the
   same, it still accepts a name or a path.
+- Renamed `accuracy()` to `score()`.
+- Renamed `Optimizer` to `Tuner`.
 ### Fixed
 - Record object key properties are now always strings
 
@@ -58,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example usage of sklearn operations
 - Example Flower17 species image classification
 - Configloading ablity from CLI using "@" before filename
-- Docstrings and doctestable example for DataFlowSource
+- Docstrings and doctestable example for DataFlowPreprocessSource
 - XGBoost Regression Model
 - Pre-Trained PyTorch torchvision Models
 - Spacy model for NER
@@ -70,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Operations plugin for image preprocessing
 - `-pretty` flag to `list records` and `predict` commands
 - daal4py based linear regression model
-- DataFlowSource can take a config file as dataflow via the CLI.
+- DataFlowPreprocessSource can take a config file as dataflow via the CLI.
 - Support for link on conditions in dataflow diagrams
 - `edit all` command to edit records in bulk
 - Support for Tensorflow 2.2

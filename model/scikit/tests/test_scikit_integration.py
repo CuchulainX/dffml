@@ -3,9 +3,7 @@ This file contains integration tests. We use the CLI to exercise functionality o
 various DFFML classes and constructs.
 """
 import csv
-import json
 import pathlib
-import contextlib
 
 import numpy as np
 from sklearn.datasets import make_blobs, make_regression
@@ -88,28 +86,25 @@ class TestScikitClassification(AsyncTestCase):
             "-source-filename",
             test_filename,
         )
-        # Ensure JSON output works as expected (#261)
-        with contextlib.redirect_stdout(self.stdout):
-            # Make prediction
-            await CLI._main(
-                "predict",
-                "all",
-                "-model",
-                "scikitsvc",
-                *features,
-                "-model-predict",
-                "true_label:int:1",
-                "-model-location",
-                model_dir,
-                "-sources",
-                "predict_data=csv",
-                "-source-filename",
-                predict_filename,
-            )
-        results = json.loads(self.stdout.getvalue())
+        # Make prediction
+        results = await CLI._main(
+            "predict",
+            "all",
+            "-model",
+            "scikitsvc",
+            *features,
+            "-model-predict",
+            "true_label:int:1",
+            "-model-location",
+            model_dir,
+            "-sources",
+            "predict_data=csv",
+            "-source-filename",
+            predict_filename,
+        )
         self.assertTrue(isinstance(results, list))
         self.assertTrue(results)
-        results = results[0]
+        results = results[0].export()
         self.assertIn("prediction", results)
         results = results["prediction"]
         self.assertIn("true_label", results)
@@ -194,25 +189,22 @@ class TestScikitRegression(AsyncTestCase):
             "-source-filename",
             test_filename,
         )
-        # Ensure JSON output works as expected (#261)
-        with contextlib.redirect_stdout(self.stdout):
-            # Make prediction
-            await CLI._main(
-                "predict",
-                "all",
-                "-model",
-                "scikitridge",
-                *features,
-                "-model-predict",
-                "true_label:float:1",
-                "-model-location",
-                model_dir,
-                "-sources",
-                "predict_data=csv",
-                "-source-filename",
-                predict_filename,
-            )
-        results = json.loads(self.stdout.getvalue())
+        # Make prediction
+        results = await CLI._main(
+            "predict",
+            "all",
+            "-model",
+            "scikitridge",
+            *features,
+            "-model-predict",
+            "true_label:float:1",
+            "-model-location",
+            model_dir,
+            "-sources",
+            "predict_data=csv",
+            "-source-filename",
+            predict_filename,
+        )
         self.assertTrue(isinstance(results, list))
         self.assertTrue(results)
         results = results[0]
@@ -347,22 +339,20 @@ class TestScikitClustering(AsyncTestCase):
                     ]
                 )
             )
-            with contextlib.redirect_stdout(self.stdout):
-                # Make prediction
-                await CLI._main(
-                    "predict",
-                    "all",
-                    "-model",
-                    model,
-                    "-model-location",
-                    model_dir,
-                    *features,
-                    "-sources",
-                    "predict_data=csv",
-                    "-source-filename",
-                    predict_file,
-                )
-            results = json.loads(self.stdout.getvalue())
+            # Make prediction
+            results = await CLI._main(
+                "predict",
+                "all",
+                "-model",
+                model,
+                "-model-location",
+                model_dir,
+                *features,
+                "-sources",
+                "predict_data=csv",
+                "-source-filename",
+                predict_file,
+            )
             self.stdout.truncate(0)
             self.stdout.seek(0)
             self.assertTrue(isinstance(results, list))

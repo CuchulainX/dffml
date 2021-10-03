@@ -6,8 +6,8 @@ from ..base import (
     config,
     field,
 )
-from ..high_level.ml import train, accuracy
-from .optimizer import Optimizer, OptimizerContext
+from ..high_level.ml import train, score
+from .tuner import Tuner, TunerContext
 from ..util.entrypoint import entrypoint
 from ..source.source import BaseSource, Record
 from ..accuracy.accuracy import AccuracyScorer, AccuracyContext
@@ -20,9 +20,9 @@ class ParameterGridConfig:
     parameters: dict = field("Parameters to be optimized")
 
 
-class ParameterGridContext(OptimizerContext):
+class ParameterGridContext(TunerContext):
     """
-    Parameter Grid Optimizer
+    Parameter Grid Tuner
     """
 
     async def optimize(
@@ -77,9 +77,7 @@ class ParameterGridContext(OptimizerContext):
                     param = names[i]
                     setattr(model.config, names[i], combination[i])
                 await train(model, *train_data)
-                acc = await accuracy(
-                    model, accuracy_scorer, feature, *test_data
-                )
+                acc = await score(model, accuracy_scorer, feature, *test_data)
                 logging.info(f"Accuracy of the tuned model: {acc}")
                 if acc > highest_acc:
                     highest_acc = acc
@@ -94,7 +92,7 @@ class ParameterGridContext(OptimizerContext):
 
 
 @entrypoint("parameter_grid")
-class ParameterGrid(Optimizer):
+class ParameterGrid(Tuner):
 
     CONFIG = ParameterGridConfig
     CONTEXT = ParameterGridContext

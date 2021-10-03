@@ -109,7 +109,7 @@ and temperature in a new file.
 .. code-block:: console
     :test:
 
-    $ dffml merge text=df temp=csv \
+    $ dffml merge text=dfpreprocess temp=csv \
         -source-text-dataflow preprocess_ops.json \
         -source-text-features city:str:1 state:str:1 month:int:1 \
         -source-text-source csv \
@@ -119,6 +119,17 @@ and temperature in a new file.
         -source-temp-readwrite \
         -log debug
     $ cat preprocessed.csv
+
+Model Install
+-------------
+
+We need to install the tensorflow models since we'll be using the
+:ref:`TensorFlow DNN Regressor <plugin_model_dffml_model_tensorflow_tfdnnr>`
+
+.. code-block:: console
+    :test:
+
+    $ python -m pip install -U dffml-model-tensorflow
 
 Model Training
 --------------
@@ -189,7 +200,7 @@ for the prediction of sales.
         -model-features population:int:1 temperature:float:1 \
         -model-predict sales:int:1 \
         -model-location tempdir \
-        -sources preprocess=df \
+        -sources preprocess=dfpreprocess \
         -source-preprocess-dataflow preprocess_ops.json \
         -source-preprocess-features city:str:1 state:str:1 month:int:1 \
         -source-preprocess-source csv \

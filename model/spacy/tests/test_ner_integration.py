@@ -137,42 +137,38 @@ class TestSpacyNERModel(AsyncTestCase):
             "-scorer",
             "sner",
         )
-        with contextlib.redirect_stdout(self.stdout):
-            # Make prediction
-            await CLI._main(
-                "predict",
-                "all",
-                "-model",
-                "spacyner",
-                "-sources",
-                "s=op",
-                "-source-opimp",
-                "model.spacy.dffml_model_spacy.ner.utils:parser",
-                "-source-args",
-                test_data_filename,
-                "True",
-                "-log",
-                "debug",
-                "-model-model_name",
-                "en_core_web_sm",
-                "-model-location",
-                directory,
-                "-model-n_iter",
-                "5",
-            )
-            results = json.loads(self.stdout.getvalue())
-            self.stdout.truncate(0)
-            self.stdout.seek(0)
-            self.assertTrue(isinstance(results, list))
-            self.assertTrue(results)
-            results = results[0]
-            self.assertIn("prediction", results)
-            results = results["prediction"]
-            self.assertIn("Tag", results)
-            results = results["Tag"]
-            self.assertIn("value", results)
-            results = results["value"]
-            self.assertIn(results[0][1], ["ORG", "PERSON"])
+        # Make prediction
+        results = await CLI._main(
+            "predict",
+            "all",
+            "-model",
+            "spacyner",
+            "-sources",
+            "s=op",
+            "-source-opimp",
+            "model.spacy.dffml_model_spacy.ner.utils:parser",
+            "-source-args",
+            test_data_filename,
+            "True",
+            "-log",
+            "debug",
+            "-model-model_name",
+            "en_core_web_sm",
+            "-model-location",
+            directory,
+            "-model-n_iter",
+            "5",
+        )
+        self.assertTrue(isinstance(results, list))
+        self.assertTrue(results)
+        results = results[0].export()
+        self.assertIn("prediction", results)
+        results = results["prediction"]
+        self.assertIn("Tag", results)
+        results = results["Tag"]
+        self.assertIn("value", results)
+        results = results["value"]
+        self.assertIn(results[0][1], ["ORG", "PERSON"])
 
         # Make prediction using dffml.operations.predict
         result = await Develop.cli(
@@ -246,16 +242,14 @@ class TestSpacyNERModel(AsyncTestCase):
                 "r",
             ) as f:
                 predict_cmnd = clean_args(f, tempdir)
-            with contextlib.redirect_stdout(self.stdout):
-                await CLI._main(*predict_cmnd[1:])
-                results = json.loads(self.stdout.getvalue())
-                self.assertTrue(isinstance(results, list))
-                self.assertTrue(results)
-                results = results[0]
-                self.assertIn("prediction", results)
-                results = results["prediction"]
-                self.assertIn("Tag", results)
-                results = results["Tag"]
-                self.assertIn("value", results)
-                results = results["value"]
-                self.assertIn(result[0][1], ["ORG", "PERSON"])
+            results = await CLI._main(*predict_cmnd[1:])
+            self.assertTrue(isinstance(results, list))
+            self.assertTrue(results)
+            results = results[0].export()
+            self.assertIn("prediction", results)
+            results = results["prediction"]
+            self.assertIn("Tag", results)
+            results = results["Tag"]
+            self.assertIn("value", results)
+            results = results["value"]
+            self.assertIn(result[0][1], ["ORG", "PERSON"])
